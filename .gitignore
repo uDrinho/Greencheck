@@ -1,0 +1,16 @@
+# --- Ambiente Python ---
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+# --- IDEs e Editores ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Docker ---
+.env
+*.log
