@@ -89,9 +89,10 @@ Para a perfeita reprodução do ambiente deste projeto, certifique-se de possuir
 
 ---
 
-##  Como Executar o Projeto Localmente
+###  Como Executar o Projeto Localmente
 
 **1. Provisionamento do Banco de Dados (Docker)**
+
 Na raiz do projeto, execute o comando abaixo para levantar o contêiner do PostgreSQL em segundo plano:
 ```bash
 docker compose up -d
@@ -104,25 +105,25 @@ Ainda na raiz do projeto, isole as dependências criando e ativando um ambiente 
 
 python3 -m venv venv
 ```
-# Ativação nativa (Linux/macOS):
+### Ativação nativa (Linux/macOS):
 ```bash
 
 source venv/bin/activate
 ```
 
-# Ativação via PowerShell (Windows):
+### Ativação via PowerShell (Windows):
 ```bash
 
 .\venv\Scripts\Activate.ps1
 ```
-## Instalação das Bibliotecas
+### Instalação das Bibliotecas
 Com o venv ativado, instale os pacotes requeridos:
 ```bash
 pip install --upgrade pip
 pip install -r app/requirements.txt
 ```
 
-## Inicialização da Aplicação
+### Inicialização da Aplicação
 Rode o framework Streamlit para subir o servidor local e abrir a interface no navegador:
 ```bash
 streamlit run app/app.py
