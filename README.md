@@ -1,8 +1,12 @@
 ## Green Check
 Lucas Dúckur Nunes Andreolli - 15471518
+
 Caio Draco Araújo Albuquerque Galvão - 15573731
+
 Pedro Henrique Barbosa Oliveira - 15483776
+
 Marcos Vinicius Cota Rodrigues da Trindade - 15511001
+
 Kattryel Henrique Santos Rezende - 15522383
 
 ---
@@ -57,7 +61,7 @@ O projeto conceitual lida de forma consciente com alguns ciclos semânticos nece
 * O mesmo ocorre no ciclo de Estipulação de Uso e Planejamento, onde o planejamento estratégico de uma cultura e a alocação prática de defensivos agrícolas/água são operações independentes, porém conectadas à mesma Safra.
 
 ### Estrutura do Projeto
-
+```text
 GreenCheck/
 │
 ├── docker-compose.yml       # Orquestração do contêiner PostgreSQL local
@@ -74,7 +78,7 @@ GreenCheck/
     ├── queries.py           # Repositório de SQL parametrizado (Proteção contra SQL Injection)
     ├── backend.py           # Lógica de negócio e controle de transações explícitas (ACID)
     └── app.py               # Interface de usuário construída em Streamlit 
-
+```
 ##  Requisitos de Infraestrutura e Dependências
 
 Para a perfeita reprodução do ambiente deste projeto, certifique-se de possuir as seguintes ferramentas instaladas:
