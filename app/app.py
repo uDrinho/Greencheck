@@ -48,11 +48,10 @@ def limpar_cpf(cpf_digitado):
 
 # ---------------------------------------------------------
 # 3. Estrutura de Navegação (Abas)
-# ---------------------------------------------------------
-# Nomes de variáveis mais claros para as abas
-aba_consulta, aba_cadastro = st.tabs([
+aba_consulta, aba_cadastro, aba_relatorios = st.tabs([
     " Consultar Funcionário", 
-    " Cadastrar Trabalhador Rural"
+    " Cadastrar Trabalhador Rural",
+    " Relatórios Gerenciais"
 ])
 
 # =========================================================
@@ -62,13 +61,16 @@ with aba_consulta:
     st.header("Consulta de Funcionário")
     st.write("Busque um funcionário cadastrado pelo seu CPF.")
     
-    cpf_busca = st.text_input(
-        "CPF do Funcionário (Busca)", 
-        placeholder="Ex: 123.456.789-00", 
-        max_chars=14
-    )
-    
-    if st.button("Buscar Dados", type="primary"):
+    with st.form("form_consulta", clear_on_submit=False):
+        cpf_busca = st.text_input(
+            "CPF do Funcionário (Busca)", 
+            placeholder="Ex: 123.456.789-00", 
+            max_chars=14
+        )
+        
+        submitted = st.form_submit_button("Buscar Dados", type="primary")
+        
+    if submitted:
         cpf_limpo = limpar_cpf(cpf_busca)
         
         if len(cpf_limpo) != 11:
@@ -83,14 +85,13 @@ with aba_consulta:
                     
                     dados = resposta["dados"]
                     
-                    # Layout original de 2 colunas, mas com tipografia focada em UX (sem cortes)
                     col1, col2 = st.columns(2)
                     
                     with col1:
                         st.caption("NOME COMPLETO")
                         st.subheader(dados["nome"])
                         
-                        st.write("") # Espaço em branco sutil
+                        st.write("")
                         
                         st.caption("CARGO")
                         st.subheader(dados["cargo"])
@@ -99,7 +100,7 @@ with aba_consulta:
                         st.caption("SALÁRIO")
                         st.subheader(f"R$ {dados['salario']:.2f}")
                         
-                        st.write("") # Espaço em branco sutil
+                        st.write("")
                         
                         st.caption("DATA DE CONTRATAÇÃO")
                         st.subheader(dados["data_contratacao"].strftime("%d/%m/%Y"))
@@ -158,3 +159,116 @@ with aba_cadastro:
                         st.balloons()
                     else:
                         st.error(resposta["mensagem"])
+
+# =========================================================
+# ABA 3: RELATÓRIOS GERENCIAIS
+# =========================================================
+with aba_relatorios:
+    st.header("Relatórios e Análises")
+    st.write("Ferramentas de apoio à decisão para engenheiros e gerentes.")
+
+    # ------------------------------------------------------
+    # Relatório 1: Safras por Trabalhador
+    # ------------------------------------------------------
+    st.subheader(" Safras de um Trabalhador Rural")
+    with st.form("form_safras_trabalhador", clear_on_submit=False):
+        cpf_trab = st.text_input("CPF do Trabalhador", key="cpf_trab")
+        submitted = st.form_submit_button("Buscar Safras")
+    if submitted:
+        cpf_limpo = limpar_cpf(cpf_trab)
+        if len(cpf_limpo) != 11:
+            st.warning("CPF deve ter 11 dígitos.")
+        elif not backend.trabalhador_existe(cpf_limpo):
+            st.error("Trabalhador não encontrado.")
+        else:
+            with st.spinner("Consultando..."):
+                resposta = backend.listar_safras_trabalhador(cpf_limpo)
+                if resposta["sucesso"]:
+                    if resposta["dados"]:
+                        st.success(f"Safras encontradas: {len(resposta['dados'])}")
+                        st.dataframe(resposta["dados"])
+                    else:
+                        st.info("Nenhuma safra encontrada para este trabalhador.")
+                else:
+                    st.error(resposta["mensagem"])
+
+    st.markdown("---")
+
+    # ------------------------------------------------------
+    # Relatório 2: Estoque e Vendas de Produto
+    # ------------------------------------------------------
+    st.subheader(" Estoque e Vendas de um Produto")
+    with st.form("form_estoque_vendas", clear_on_submit=False):
+        nome_produto = st.text_input("Nome do Produto Agrícola", key="nome_prod")
+        submitted = st.form_submit_button("Consultar Produto")
+    if submitted:
+        if not nome_produto.strip():
+            st.warning("Informe o nome do produto.")
+        else:
+            with st.spinner("Consultando..."):
+                resposta = backend.estoque_vendas_produto(nome_produto.strip())
+                if resposta["sucesso"]:
+                    dados = resposta["dados"]
+                    col1, col2, col3 = st.columns(3)
+                    col1.metric("Estoque Atual", f"{dados['quantidade_em_estoque']} kg")
+                    col2.metric("Total Vendido", f"{dados['total_vendido']} kg")
+                    col3.metric("Receita Total", f"R$ {dados['receita_total']:,.2f}")
+                else:
+                    st.error(resposta["mensagem"])
+
+    st.markdown("---")
+
+    # ------------------------------------------------------
+    # Relatório 3: Lotes Mais Avaliados
+    # ------------------------------------------------------
+    st.subheader(" Lotes com Maior Nº de Avaliações")
+    with st.form("form_lotes_avaliados"):
+        submitted = st.form_submit_button("Exibir Lotes Mais Monitorados")
+    if submitted:
+        with st.spinner("Analisando..."):
+            resposta = backend.lotes_mais_avaliados()
+            if resposta["sucesso"]:
+                if resposta["dados"]:
+                    st.dataframe(resposta["dados"])
+                else:
+                    st.info("Nenhum lote avaliado ainda.")
+            else:
+                st.error(resposta["mensagem"])
+
+    st.markdown("---")
+
+    # ------------------------------------------------------
+    # Relatório 4: Engenheiros com Cobertura Total
+    # ------------------------------------------------------
+    st.subheader(" Engenheiros que Avaliaram Todos os Lotes")
+    with st.form("form_engenheiros_cobertura"):
+        submitted = st.form_submit_button("Listar Engenheiros Completos")
+    if submitted:
+        with st.spinner("Verificando cobertura..."):
+            resposta = backend.engenheiros_cobertura_total()
+            if resposta["sucesso"]:
+                if resposta["dados"]:
+                    st.dataframe(resposta["dados"])
+                else:
+                    st.info("Nenhum engenheiro avaliou todos os lotes.")
+            else:
+                st.error(resposta["mensagem"])
+
+    st.markdown("---")
+
+    # ------------------------------------------------------
+    # Relatório 5: Gerentes com Todas as Transações
+    # ------------------------------------------------------
+    st.subheader(" Gerentes com Venda, Compra e Manutenção")
+    with st.form("form_gerentes_transacoes"):
+        submitted = st.form_submit_button("Listar Gerentes Completos")
+    if submitted:
+        with st.spinner("Verificando transações..."):
+            resposta = backend.gerentes_transacoes_completas()
+            if resposta["sucesso"]:
+                if resposta["dados"]:
+                    st.dataframe(resposta["dados"])
+                else:
+                    st.info("Nenhum gerente realizou todos os tipos de transação.")
+            else:
+                st.error(resposta["mensagem"])

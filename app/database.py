@@ -20,25 +20,50 @@
 #    futura injeção de variáveis de ambiente (.env) para esconder senhas.
 # ==============================================================================
 
+import time
 import psycopg
 import streamlit as st
 
+
 @st.cache_resource
-def get_connection():
+def _criar_conexao():
     """
-    Estabelece a conexão com o banco de dados PostgreSQL usando psycopg3.
-    Retorna o objeto de conexão se for bem-sucedido, ou None se falhar.
+    Cria uma nova conexão com o banco de dados PostgreSQL usando psycopg3.
+    Retorna o objeto de conexão ou None em caso de falha.
     """
     try:
-        # Credenciais atualizadas com base no docker-compose.yml
         conn = psycopg.connect(
-            dbname="greencheck",        # Nome do banco (sem o underline)
-            user="admin",               # Usuário definido no Docker
-            password="adminpassword",   # Senha definida no Docker
+            dbname="greencheck",
+            user="admin",
+            password="adminpassword",
             host="localhost",
             port="5433"
         )
         return conn
-    except Exception as e:
-        st.error(f"Erro Crítico: Não foi possível conectar ao banco de dados. Detalhes: {e}")
+    except Exception:
         return None
+
+
+def reset_connection():
+    """Força a limpeza do cache de conexão, permitindo uma nova tentativa."""
+    _criar_conexao.clear()
+
+
+def get_connection():
+    """
+    Estabelece a conexão com o banco de dados PostgreSQL usando psycopg3.
+    Retorna o objeto de conexão se for bem-sucedido, ou None se falhar.
+    
+    Tenta reconectar automaticamente até 3 vezes com intervalo de 2 segundos,
+    caso a conexão esteja perdida ou ainda não esteja disponível.
+    """
+    tentativas = 3
+    for i in range(tentativas):
+        conn = _criar_conexao()
+        if conn is not None and not conn.closed:
+            return conn
+        # Se a conexão falhou ou está fechada, limpa o cache e tenta novamente
+        _criar_conexao.clear()
+        if i < tentativas - 1:
+            time.sleep(2)
+    return None
