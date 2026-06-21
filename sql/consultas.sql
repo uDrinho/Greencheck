@@ -37,7 +37,6 @@ WHERE pa.nome NOT IN (
 ORDER BY "Quantidade Vendida (kg)" DESC;
 
 
-
 -- ----------------------------------------------------------------------------
 -- Água utilizada nas safras que produziram o produto agrícola de maior receita
 -- ----------------------------------------------------------------------------
@@ -72,15 +71,12 @@ FROM (
 ) agua_safra
 GROUP BY agua_safra.produto_agricola;
 
-
-
 -- ------------------------------------------------------
 -- Lote(s) com o maior número de avaliações
 -- ------------------------------------------------------
--- Objetivo: Identificar o(s) lote(s) mais monitorado(s).
--- Sem parâmetros; usa HAVING + subconsulta correlacionada.
--- Complexidade: Alta (agrupamento, subconsulta, ALL).
--- Se a tabela Avaliacao estiver vazia, não retorna nenhuma linha.
+-- Objetivo: Identificar o(s) lote(s) mais monitorado(s), fornecendo as latitudes, longitudes
+-- e quantidades totais de avaliações destes lotes.
+-- Sem parâmetros
 
 SELECT l.latitude,
        l.longitude,
@@ -95,28 +91,6 @@ HAVING COUNT(*) >= ALL (
 )
 AND (SELECT COUNT(*) FROM Avaliacao) > 0;
 
--- ------------------------------------------------------
--- Gerentes com transações completas
--- ------------------------------------------------------
--- Objetivo: Gerentes que fizeram pelo menos uma venda, uma compra e uma manutenção.
--- Técnica: NOT EXISTS ( conjunto_requerido EXCEPT conjunto_do_gerente )
--- Complexidade: Alta (divisão relacional com EXCEPT).
-
-SELECT g.cpf, f.nome
-FROM Gerente_Agricola g
-JOIN Funcionario f ON g.cpf = f.cpf
-WHERE NOT EXISTS (
-    SELECT t.tipo FROM (VALUES ('Venda'), ('Compra'), ('Manutencao')) AS t(tipo)
-    EXCEPT
-    (
-        SELECT 'Venda' FROM Venda v WHERE v.gerente_agricola = g.cpf
-        UNION ALL
-        SELECT 'Compra' FROM Compra c WHERE c.gerente_agricola = g.cpf
-        UNION ALL
-        SELECT 'Manutencao' FROM Manutencao m WHERE m.gerente_agricola = g.cpf
-    )
-);
-
 
 -- --------------------------------------------------------------------------
 -- Trabalhadores que produziram o mesmo produto agrícola que outro específico
@@ -125,8 +99,6 @@ WHERE NOT EXISTS (
 -- Objetivo: Listar o cpf e o nome de todos os trabalhadores que produziram pelo menos os mesmos
 -- produtos agrícolas que um trabalhador específico
 -- Parâmetro: CPF do trabalhador rural específico. No exemplo, foi utilizado o CPF 15522383000
--- Complexidade: Média (Divisão Relacional utilizando subconsultas, NOT EXISTS e EXECPT)
-
 
 SELECT f.cpf, f.nome
 	FROM trabalhador_rural tr 
