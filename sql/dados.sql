@@ -25,6 +25,8 @@ INSERT INTO Lote (latitude, longitude, comprimento, largura) VALUES
 INSERT INTO Insumo (nome, tipo, quantidade_em_estoque) VALUES 
 ('Semente de Milho P30F53', 'Semente', 100.00),
 ('Semente de Soja M8210PRO', 'Semente', 150.00),
+('Semente de Feijao Carioca Comum', 'Semente', 80.00),
+('Semente de Arroz Agulhinha', 'Semente', 120.00),
 ('Trator John Deere 6J', 'Maquinario', 2.00),
 ('Colheitadeira Case IH 8250', 'Maquinario', 1.00),
 ('Agua de Irrigacao - Poco 1', 'Agua', 5000.00),
@@ -53,7 +55,9 @@ INSERT INTO Agua (insumo, ph) VALUES
 -- Semente
 INSERT INTO Semente (insumo, nome_cientifico) VALUES 
 ('Semente de Milho P30F53', 'Zea mays'),
-('Semente de Soja M8210PRO', 'Glycine max');
+('Semente de Soja M8210PRO', 'Glycine max'),
+('Semente de Feijao Carioca Comum', 'Phaseolus vulgaris'),
+('Semente de Arroz Agulhinha', 'Oryza sativa');
 
 -- Maquinario
 INSERT INTO Maquinario (insumo) VALUES 
@@ -68,7 +72,9 @@ INSERT INTO TecnicoDeManutencao (cnpj) VALUES ('33333333333333'), ('343434343434
 -- Produto Agricola (Mínimo 2)
 INSERT INTO Produto_Agricola (nome, quantidade_em_estoque, semente) VALUES 
 ('Milho em Grão', 5000, 'Semente de Milho P30F53'),
-('Soja em Grão', 3000, 'Semente de Soja M8210PRO');
+('Soja em Grão', 3000, 'Semente de Soja M8210PRO'),
+('Feijao Carioca', 2000, 'Semente de Feijao Carioca Comum'),
+('Arroz Agulhinha', 1500, 'Semente de Arroz Agulhinha');
 
 
 -- ==============================================================================
@@ -112,7 +118,7 @@ INSERT INTO Tecnologia_Transgenica (semente, tecnologia) VALUES
 -- Avaliação de Lote
 INSERT INTO Avaliacao (latitude, longitude, avaliador, data_hora, umidade_do_solo, ph_do_solo, permeabilidade) VALUES 
 (-21.98, -47.88, '15471518000', '2025-09-15 08:30:00', 0.45, 6.2, 5.50),
-(-21.98, -47.88, '15573731000', '2025-10-20 09:30:00', 0.45, 6.3, 5.50);
+(-21.98, -47.88, '15573731000', '2025-10-20 09:30:00', 0.45, 6.3, 5.50),
 (-22.00, -47.90, '15573731000', '2025-10-20 09:15:00', 0.50, 5.8, 4.80);
 
 
@@ -144,7 +150,10 @@ INSERT INTO Teor_De_Nutrientes (latitude, longitude, avaliador, data_hora, nutri
 -- Venda (Prefixos V-)
 INSERT INTO Venda (nota_fiscal, gerente_agricola, comprador, data_hora, preco_total) VALUES 
 ('V-1001', '15483776000', '11111111111111', '2026-03-10 14:00:00', 122500.00),
-('V-1002', '15511001000', '12121212121212', '2026-04-15 10:00:00', 155000.00);
+('V-1002', '15511001000', '12121212121212', '2026-04-15 10:00:00', 155000.00),
+('V-9001', '15483776000', '11111111111111', '2026-02-14 10:30:00', 4000.00),
+('V-9002', '15483776000', '11111111111111', '2026-01-20 16:00:00', 2400.00);
+
 
 -- Compra (Prefixos C-)
 INSERT INTO Compra (nota_fiscal, gerente_agricola, fornecedor, data_hora, preco_total) VALUES 
@@ -169,7 +178,9 @@ INSERT INTO Insumo_Estipulado (safra, estipulador, data_hora, insumo, quantidade
 -- Venda De Produto
 INSERT INTO Venda_De_Produto (nota_fiscal, produto_agricola, quantidade_vendida, preco) VALUES 
 ('V-1001', 'Milho em Grão', 24500, 5.00),
-('V-1002', 'Soja em Grão', 31000, 5.00);
+('V-1002', 'Soja em Grão', 31000, 5.00),
+('V-9001', 'Feijao Carioca', 500, 8.00),
+('V-9002', 'Arroz Agulhinha', 300, 8.00);
 
 -- Compra De Insumo
 INSERT INTO Compra_De_Insumo (nota_fiscal, insumo, quantidade_comprada, preco) VALUES 

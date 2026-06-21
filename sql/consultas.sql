@@ -3,7 +3,7 @@
 -- =============================================================================
 
 -- 5 consultas: 
---          Histórico de safras de um trabalhador rural
+--          Vendas de produtos agrícolas não-transgênicos em um mês
 --          Estoque e vendas de um produto agrícola
 --          Lote(s) com o maior número de avaliações
 --          Engenheiros que avaliaram TODOS os lotes
@@ -12,26 +12,35 @@
 -- ------------------------------------------------------
 -- Histórico de safras de um trabalhador rural
 -- ------------------------------------------------------
--- Objetivo: Listar todas as safras em que o trabalhador participou.
--- Parâmetro: CPF do trabalhador rural.
--- Complexidade: Média (junções múltiplas).
+
+-- No contexto do projeto, um produto agrícola é chamado de não-transgênico se sua semente
+-- não possuir nenhuma tecnologia transgênica.
+-- Objetivo: Listar o nome e a quantidade vendida em um dado mês (de um ano) de todos os produtos agrícolas não-transgênicos da base. Se um produto agrícola
+-- não-transgênico não foi vendido em um mês, ele deve aparecer no resultado da consulta com quantidade vendida igual a zero. O resultado deve estar
+-- em ordem descrescente de quantidade vendida.
+-- Parâmetro: mês e ano em que se deseja consultar as vendas. No caso, foi adotado mês de Fevereiro de 2026.
+-- Complexidade: Média (LEFT JOIN, Agregação, subsconsulta aninhada não-correlacional)
+    
+    SELECT pa.nome AS Nome, COALESCE(vendas_fevereiro.quantidade_total_vendida, 0) AS "Quantidade Vendida (kg)"
+    FROM Produto_Agricola pa
+    LEFT JOIN (
+        SELECT vdp.produto_agricola, SUM(vdp.quantidade_vendida) AS quantidade_total_vendida
+        FROM Venda_De_Produto vdp
+        JOIN Venda v ON vdp.nota_fiscal = v.nota_fiscal
+        WHERE (v.data_hora >= '2026-02-01 00:00:00') AND (v.data_hora < '2026-03-01 00:00:00')
+        GROUP BY vdp.produto_agricola
+    ) vendas_fevereiro
+    ON pa.nome = vendas_fevereiro.produto_agricola
+    WHERE pa.nome NOT IN (
+        SELECT pa1.nome
+        FROM Produto_Agricola pa1
+        JOIN Tecnologia_Transgenica tt ON tt.semente = pa1.semente
+    )
+    ORDER BY "Quantidade Vendida (kg)" DESC;
 
 
-SELECT s.id               AS safra_id,
-       s.latitude,
-       s.longitude,
-       s.data_de_plantio,
-       s.data_de_colheita,
-       pa.nome            AS produto,
-       s.quantidade_produzida
-FROM Trabalhador_Rural tr
-JOIN Trabalha t       ON tr.cpf = t.trabalhador_rural
-JOIN Safra s          ON t.safra = s.id
-JOIN Produto_Agricola pa ON s.produto_agricola = pa.nome
-WHERE tr.cpf = %s
-ORDER BY s.data_de_plantio DESC;
 
-
+    
 -- ------------------------------------------------------
 -- Estoque e vendas de um produto agrícola
 -- ------------------------------------------------------
