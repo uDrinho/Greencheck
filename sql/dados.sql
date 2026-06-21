@@ -112,6 +112,7 @@ INSERT INTO Tecnologia_Transgenica (semente, tecnologia) VALUES
 -- Avaliação de Lote
 INSERT INTO Avaliacao (latitude, longitude, avaliador, data_hora, umidade_do_solo, ph_do_solo, permeabilidade) VALUES 
 (-21.98, -47.88, '15471518000', '2025-09-15 08:30:00', 0.45, 6.2, 5.50),
+(-21.98, -47.88, '15573731000', '2025-10-20 09:30:00', 0.45, 6.3, 5.50);
 (-22.00, -47.90, '15573731000', '2025-10-20 09:15:00', 0.50, 5.8, 4.80);
 
 
