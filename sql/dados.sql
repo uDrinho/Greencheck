@@ -94,11 +94,11 @@ INSERT INTO Funcionario (cpf, salario, nome, cargo, contratado_por, data_contrat
 ('15471518000', 9000.00, 'Lucas Dúckur Nunes Andreolli', 'Engenheiro Agrônomo', '15483776000', '2025-02-01 09:00:00'),
 ('15573731000', 9000.00, 'Caio Draco Araújo Albuquerque', 'Engenheiro Agrônomo', '15483776000', '2025-02-02 09:00:00'),
 ('15522383000', 3500.00, 'Kattryel Henrique Santos', 'Trabalhador Rural', '15483776000', '2025-03-01 07:00:00'),
-('99999999999', 3500.00, 'José da Silva', 'Trabalhador Rural', '15483776000', '2025-03-02 07:00:00');
-
+('99999999999', 3500.00, 'José da Silva', 'Trabalhador Rural', '15483776000', '2025-03-02 07:00:00'),
+('88888888888', 3500.00, 'Maria Sousa', 'Trabalhador Rural', '15483776000', '2025-02-01 10:00:00');
 -- 4. Povoamos as tabelas específicas restantes
 INSERT INTO Engenheiro_Agronomo (cpf) VALUES ('15471518000'), ('15573731000');
-INSERT INTO Trabalhador_Rural (cpf) VALUES ('15522383000'), ('99999999999');
+INSERT INTO Trabalhador_Rural (cpf) VALUES ('15522383000'), ('99999999999'), ('88888888888');
 
 
 -- ==============================================================================
@@ -130,7 +130,9 @@ INSERT INTO Avaliacao (latitude, longitude, avaliador, data_hora, umidade_do_sol
 INSERT INTO Trabalha (trabalhador_rural, safra) VALUES 
 ('15522383000', 1),
 ('15522383000', 2),
-('99999999999', 1);
+('99999999999', 1),
+('88888888888', 1),
+('88888888888', 2);
 
 -- Uso
 INSERT INTO Uso (safra, estipulador, data_hora) VALUES 

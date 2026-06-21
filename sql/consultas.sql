@@ -6,8 +6,8 @@
 --          Vendas de produtos agrícolas não-transgênicos em um mês
 --          Água utilizada nas safras que produziram o produto agrícola de maior receita
 --          Lote(s) com o maior número de avaliações
---          Engenheiros que avaliaram TODOS os lotes
 --          Gerentes com transações completas
+--			Trabalhadores que produziram o mesmo produto agrícola que outro específico
 
 -- ------------------------------------------------------
 -- Vendas de produtos agrícolas não-transgênicos em um mês
@@ -95,29 +95,6 @@ HAVING COUNT(*) >= ALL (
 )
 AND (SELECT COUNT(*) FROM Avaliacao) > 0;
 
-
--- ------------------------------------------------------
--- Engenheiros que avaliaram TODOS os lotes
--- ------------------------------------------------------
--- Objetivo: Divisão relacional – engenheiros com cobertura total.
--- Complexidade: Alta (NOT EXISTS aninhado = divisão relacional).
-
-SELECT e.cpf, f.nome
-FROM Engenheiro_Agronomo e
-JOIN Funcionario f ON e.cpf = f.cpf
-WHERE NOT EXISTS (
-    SELECT l.latitude, l.longitude
-    FROM Lote l
-    WHERE NOT EXISTS (
-        SELECT 1
-        FROM Avaliacao a
-        WHERE a.latitude  = l.latitude
-          AND a.longitude = l.longitude
-          AND a.avaliador = e.cpf
-    )
-);
-
-
 -- ------------------------------------------------------
 -- Gerentes com transações completas
 -- ------------------------------------------------------
@@ -139,3 +116,34 @@ WHERE NOT EXISTS (
         SELECT 'Manutencao' FROM Manutencao m WHERE m.gerente_agricola = g.cpf
     )
 );
+
+
+-- --------------------------------------------------------------------------
+-- Trabalhadores que produziram o mesmo produto agrícola que outro específico
+-- --------------------------------------------------------------------------
+
+-- Objetivo: Listar o cpf e o nome de todos os trabalhadores que produziram pelo menos os mesmos
+-- produtos agrícolas que um trabalhador específico
+-- Parâmetro: CPF do trabalhador rural específico. No exemplo, foi utilizado o CPF 15522383000
+-- Complexidade: Média (Divisão Relacional utilizando subconsultas, NOT EXISTS e EXECPT)
+
+
+SELECT f.cpf, f.nome
+	FROM trabalhador_rural tr 
+	JOIN funcionario f ON f.cpf = tr.cpf
+	WHERE NOT EXISTS(
+		(SELECT DISTINCT s.produto_agricola 
+			FROM trabalha t 
+			JOIN safra s ON t.safra = s.id
+			WHERE t.trabalhador_rural  = '15522383000')
+		
+		EXCEPT
+		
+		(SELECT DISTINCT s.produto_agricola 
+			FROM trabalha t 
+			JOIN safra s ON t.safra = s.id
+			WHERE t.trabalhador_rural = tr.cpf)
+		) 
+		AND tr.cpf != '15522383000';
+
+
