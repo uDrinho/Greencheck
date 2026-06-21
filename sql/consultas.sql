@@ -4,58 +4,74 @@
 
 -- 5 consultas: 
 --          Vendas de produtos agrícolas não-transgênicos em um mês
---          Estoque e vendas de um produto agrícola
+--          Água utilizada nas safras que produziram o produto agrícola de maior receita
 --          Lote(s) com o maior número de avaliações
 --          Engenheiros que avaliaram TODOS os lotes
 --          Gerentes com transações completas
 
 -- ------------------------------------------------------
--- Histórico de safras de um trabalhador rural
+-- Vendas de produtos agrícolas não-transgênicos em um mês
 -- ------------------------------------------------------
-
 -- No contexto do projeto, um produto agrícola é chamado de não-transgênico se sua semente
 -- não possuir nenhuma tecnologia transgênica.
 -- Objetivo: Listar o nome e a quantidade vendida em um dado mês (de um ano) de todos os produtos agrícolas não-transgênicos da base. Se um produto agrícola
--- não-transgênico não foi vendido em um mês, ele deve aparecer no resultado da consulta com quantidade vendida igual a zero. O resultado deve estar
+-- não-transgênico não foi vendido no mês em questão, ele deve aparecer no resultado da consulta com quantidade vendida igual a zero. O resultado deve estar
 -- em ordem descrescente de quantidade vendida.
--- Parâmetro: mês e ano em que se deseja consultar as vendas. No caso, foi adotado mês de Fevereiro de 2026.
--- Complexidade: Média (LEFT JOIN, Agregação, subsconsulta aninhada não-correlacional)
+-- Parâmetro: mês e ano em que se deseja consultar as vendas. No caso, foi adotado o mês de Fevereiro de 2026.
     
-    SELECT pa.nome AS Nome, COALESCE(vendas_fevereiro.quantidade_total_vendida, 0) AS "Quantidade Vendida (kg)"
-    FROM Produto_Agricola pa
-    LEFT JOIN (
-        SELECT vdp.produto_agricola, SUM(vdp.quantidade_vendida) AS quantidade_total_vendida
-        FROM Venda_De_Produto vdp
-        JOIN Venda v ON vdp.nota_fiscal = v.nota_fiscal
-        WHERE (v.data_hora >= '2026-02-01 00:00:00') AND (v.data_hora < '2026-03-01 00:00:00')
-        GROUP BY vdp.produto_agricola
-    ) vendas_fevereiro
-    ON pa.nome = vendas_fevereiro.produto_agricola
-    WHERE pa.nome NOT IN (
-        SELECT pa1.nome
-        FROM Produto_Agricola pa1
-        JOIN Tecnologia_Transgenica tt ON tt.semente = pa1.semente
-    )
-    ORDER BY "Quantidade Vendida (kg)" DESC;
-
-
-
-    
--- ------------------------------------------------------
--- Estoque e vendas de um produto agrícola
--- ------------------------------------------------------
--- Objetivo: Mostrar estoque atual, total vendido e receita de um produto.
--- Parâmetro: nome do produto agrícola.
--- Complexidade: Média (LEFT JOIN, agregação, COALESCE).
-
-SELECT pa.nome,
-       pa.quantidade_em_estoque,
-       COALESCE(SUM(vp.quantidade_vendida), 0) AS total_vendido,
-       COALESCE(SUM(vp.quantidade_vendida * vp.preco), 0) AS receita_total
+SELECT pa.nome AS Nome, COALESCE(vendas_fevereiro.quantidade_total_vendida, 0) AS "Quantidade Vendida (kg)"
 FROM Produto_Agricola pa
-LEFT JOIN Venda_De_Produto vp ON pa.nome = vp.produto_agricola
-WHERE pa.nome = %s
-GROUP BY pa.nome, pa.quantidade_em_estoque;
+LEFT JOIN (
+    SELECT vdp.produto_agricola, SUM(vdp.quantidade_vendida) AS quantidade_total_vendida
+    FROM Venda_De_Produto vdp
+    JOIN Venda v ON vdp.nota_fiscal = v.nota_fiscal
+    WHERE (v.data_hora >= '2026-02-01 00:00:00') AND (v.data_hora < '2026-03-01 00:00:00')
+    GROUP BY vdp.produto_agricola
+) vendas_fevereiro
+ON pa.nome = vendas_fevereiro.produto_agricola
+WHERE pa.nome NOT IN (
+    SELECT pa1.nome
+    FROM Produto_Agricola pa1
+    JOIN Tecnologia_Transgenica tt ON tt.semente = pa1.semente
+)
+ORDER BY "Quantidade Vendida (kg)" DESC;
+
+
+
+-- ----------------------------------------------------------------------------
+-- Água utilizada nas safras que produziram o produto agrícola de maior receita
+-- ----------------------------------------------------------------------------
+-- Objetivo: Mostrar a média do volume de água utilizada nas safras que produziram os produtos agrícolas que mais
+-- geraram renda em vendas. Tanto o nome do produto agrícola quanto a média do volume de água devem ser mostrados no resultado.
+-- Dentre os produtos de maior receita, deve-se desconsiderar os que não possuem safras associadas e aqueles em que nenhuma safra
+-- associada possui utilização de água registrada.
+-- Parâmetro: Nenhum
+
+WITH produto_receita AS (
+    SELECT vdp.produto_agricola, SUM(vdp.quantidade_vendida * vdp.preco) AS receita
+    FROM Venda_De_Produto vdp
+    GROUP BY vdp.produto_agricola
+),
+produtos_maior_receita AS (
+    SELECT produto_receita.produto_agricola
+    FROM produto_receita
+    WHERE produto_receita.receita = (
+        SELECT MAX(receita)
+        FROM produto_receita 
+    )
+)
+
+SELECT produto_agricola, AVG(volume_agua) AS "Média do volume de água por safra"
+FROM (
+    SELECT s.produto_agricola, SUM(ie.quantidade) AS volume_agua
+    FROM produtos_maior_receita pmr
+    JOIN Safra s ON pmr.produto_agricola = s.produto_agricola
+    JOIN Insumo_Estipulado ie ON ie.safra = s.id
+    JOIN Agua a ON a.insumo = ie.insumo
+    GROUP BY s.produto_agricola, s.id
+) agua_safra
+GROUP BY agua_safra.produto_agricola;
+
 
 
 -- ------------------------------------------------------
