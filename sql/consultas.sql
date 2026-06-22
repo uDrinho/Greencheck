@@ -6,7 +6,7 @@
 --          Vendas de produtos agrícolas não-transgênicos em um mês
 --          Água utilizada nas safras que produziram o produto agrícola de maior receita
 --          Lote(s) com o maior número de avaliações
---          Gerentes com transações completas
+--          Quantidade de vendas por fornecedor de insumo
 --			Trabalhadores que produziram o mesmo produto agrícola que outro específico
 
 -- ------------------------------------------------------
@@ -91,7 +91,27 @@ HAVING COUNT(*) >= ALL (
 )
 AND (SELECT COUNT(*) FROM Avaliacao) > 0;
 
+-- ---------------------------------------------
+-- Quantidade de vendas por fornecedor de insumo
+-- ---------------------------------------------
+-- Objetivo: Para cada empresa fornecedora de insumos, mostrar a quantidade
+-- de vendas com produtos que utilizaram os insumos dela.
+-- Parâmetro: Nenhum
 
+SELECT ee.nome AS empresa, count(distinct v.nota_fiscal) AS quantidade_de_venda
+    	FROM safra s 
+    	JOIN venda_de_produto vdp ON s.produto_agricola = vdp.produto_agricola
+    	JOIN venda v ON v.nota_fiscal = vdp.nota_fiscal
+    	JOIN insumo_estipulado ie ON ie.safra = s.id
+    	JOIN compra_de_insumo cdi ON cdi.insumo = ie.insumo 
+    	JOIN compra c ON cdi.nota_fiscal = c.nota_fiscal
+    	RIGHT JOIN fornecedor f ON f.cnpj = c.fornecedor
+    	JOIN empresa_externa ee ON ee.cnpj = f.cnpj
+        WHERE (v.data_hora > s.data_de_colheita AND c.data_hora < s.data_de_plantio)
+        OR s.id IS NULL
+    	GROUP BY ee.nome;
+	
+	
 -- --------------------------------------------------------------------------
 -- Trabalhadores que produziram o mesmo produto agrícola que outro específico
 -- --------------------------------------------------------------------------
@@ -99,6 +119,7 @@ AND (SELECT COUNT(*) FROM Avaliacao) > 0;
 -- Objetivo: Listar o cpf e o nome de todos os trabalhadores que produziram pelo menos os mesmos
 -- produtos agrícolas que um trabalhador específico
 -- Parâmetro: CPF do trabalhador rural específico. No exemplo, foi utilizado o CPF 15522383000
+
 
 SELECT f.cpf, f.nome
 	FROM trabalhador_rural tr 
@@ -118,4 +139,4 @@ SELECT f.cpf, f.nome
 		) 
 		AND tr.cpf != '15522383000';
 
-
+		

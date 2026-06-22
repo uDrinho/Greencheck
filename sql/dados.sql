@@ -19,7 +19,8 @@
 -- Lote 
 INSERT INTO Lote (latitude, longitude, comprimento, largura) VALUES 
 (-21.98, -47.88, 1000.0, 500.0),
-(-22.00, -47.90, 800.0, 600.0);
+(-22.00, -47.90, 800.0, 600.0),
+(-22.02, -47.92, 400.0, 400.0);
 
 -- Insumo (Genérica - Inserindo para todos os filhos + adubo)
 INSERT INTO Insumo (nome, tipo, quantidade_em_estoque) VALUES 
@@ -40,7 +41,8 @@ INSERT INTO Empresa_Externa (cnpj, nome, telefone, endereco) VALUES
 ('22222222222222', 'Sementes Fornecedora', '16888883333', 'Rodovia Washington Luis, Km 235'),
 ('23232323232323', 'Insumos Agricolas SP', '11888884444', 'Rua Cesar Ricomi, 456'),
 ('33333333333333', 'Mecanica Tratores', '16777775555', 'Av Trabalhador Sao Carlense, 400'),
-('34343434343434', 'Oficina Case', '11777776666', 'Rua Dr. Delfim Moreira, 789');
+('34343434343434', 'Oficina Case', '11777776666', 'Rua Dr. Delfim Moreira, 789'),
+('44444444444444', 'MundoAgro', '71999888777', 'Av Antonio Carlos Magalhaes, 200');
 
 
 -- ==============================================================================
@@ -65,8 +67,8 @@ INSERT INTO Maquinario (insumo) VALUES
 ('Colheitadeira Case IH 8250');
 
 -- Especializações de Empresa Externa
-INSERT INTO Comprador (cnpj) VALUES ('11111111111111'), ('12121212121212');
-INSERT INTO Fornecedor (cnpj) VALUES ('22222222222222'), ('23232323232323');
+INSERT INTO Comprador (cnpj) VALUES ('11111111111111'), ('12121212121212'), ('44444444444444');
+INSERT INTO Fornecedor (cnpj) VALUES ('22222222222222'), ('23232323232323'), ('44444444444444');
 INSERT INTO TecnicoDeManutencao (cnpj) VALUES ('33333333333333'), ('34343434343434');
 
 -- Produto Agricola (Mínimo 2)
@@ -108,7 +110,8 @@ INSERT INTO Trabalhador_Rural (cpf) VALUES ('15522383000'), ('99999999999'), ('8
 -- Safra (sem inserir o id, que é SERIAL)
 INSERT INTO Safra (latitude, longitude, data_de_plantio, planejador, data_hora_planejamento, data_de_colheita_esperada, quantidade_produzida_esperada, data_de_colheita, produto_agricola, quantidade_produzida) VALUES 
 (-21.98, -47.88, '2025-10-01', '15471518000', '2025-09-20 10:00:00', '2026-03-01', 25000, '2026-03-05', 'Milho em Grão', 24500),
-(-22.00, -47.90, '2025-11-15', '15573731000', '2025-11-01 14:00:00', '2026-04-10', 30000, '2026-04-12', 'Soja em Grão', 31000);
+(-22.00, -47.90, '2025-11-15', '15573731000', '2025-11-01 14:00:00', '2026-04-10', 30000, '2026-04-12', 'Soja em Grão', 31000),
+(-22.02, -47.92, '2025-12-10', '15573731000', '2025-11-05 08:00:00', '2026-04-05', 10000, '2026-04-03', 'Feijao Carioca', 9300);
 
 -- Tecnologia Transgênica
 INSERT INTO Tecnologia_Transgenica (semente, tecnologia) VALUES 
@@ -126,11 +129,12 @@ INSERT INTO Avaliacao (latitude, longitude, avaliador, data_hora, umidade_do_sol
 -- ASSOCIAÇÕES (N:N)
 -- ==============================================================================
 
--- Trabalha (Assumindo que os IDs das safras gerados foram 1 e 2)
+-- Trabalha (Assumindo que os IDs das safras gerados foram 1, 2 e 3)
 INSERT INTO Trabalha (trabalhador_rural, safra) VALUES 
 ('15522383000', 1),
 ('15522383000', 2),
 ('99999999999', 1),
+('99999999999', 3),
 ('88888888888', 1),
 ('88888888888', 2);
 
@@ -154,13 +158,15 @@ INSERT INTO Venda (nota_fiscal, gerente_agricola, comprador, data_hora, preco_to
 ('V-1001', '15483776000', '11111111111111', '2026-03-10 14:00:00', 122500.00),
 ('V-1002', '15511001000', '12121212121212', '2026-04-15 10:00:00', 155000.00),
 ('V-9001', '15483776000', '11111111111111', '2026-02-14 10:30:00', 4000.00),
-('V-9002', '15483776000', '11111111111111', '2026-01-20 16:00:00', 2400.00);
+('V-9002', '15483776000', '11111111111111', '2026-01-20 16:00:00', 2400.00),
+('V-3001', '15511001000', '44444444444444', '2026-05-25 12:00:00', 4000.00);
 
 
 -- Compra (Prefixos C-)
 INSERT INTO Compra (nota_fiscal, gerente_agricola, fornecedor, data_hora, preco_total) VALUES 
 ('C-2001', '15483776000', '22222222222222', '2025-08-10 09:00:00', 15000.00),
-('C-2002', '15511001000', '23232323232323', '2025-09-05 11:00:00', 8000.00);
+('C-2002', '15511001000', '23232323232323', '2025-09-05 11:00:00', 8000.00),
+('C-3001', '15511001000', '44444444444444', '2025-10-04 12:30:00', 1500);
 
 -- Manutenção (Prefixos M-)
 INSERT INTO Manutencao (nota_fiscal, gerente_agricola, tecnico_de_manutencao, data_hora, preco_total) VALUES 
@@ -182,12 +188,14 @@ INSERT INTO Venda_De_Produto (nota_fiscal, produto_agricola, quantidade_vendida,
 ('V-1001', 'Milho em Grão', 24500, 5.00),
 ('V-1002', 'Soja em Grão', 31000, 5.00),
 ('V-9001', 'Feijao Carioca', 500, 8.00),
-('V-9002', 'Arroz Agulhinha', 300, 8.00);
+('V-9002', 'Arroz Agulhinha', 300, 8.00),
+('V-3001', 'Feijao Carioca', 500, 8.00);
 
 -- Compra De Insumo
 INSERT INTO Compra_De_Insumo (nota_fiscal, insumo, quantidade_comprada, preco) VALUES 
 ('C-2001', 'Semente de Milho P30F53', 100.00, 150.00),
-('C-2002', 'Adubo NPK 10-10-10', 500.00, 16.00);
+('C-2002', 'Adubo NPK 10-10-10', 500.00, 16.00),
+('C-3001', 'Semente de Feijao Carioca Comum', 400, 2.5);
 
 -- Maquinario Manutencao
 INSERT INTO Maquinario_Manutencao (nota_fiscal, maquinario, data_agendada, preco) VALUES 
