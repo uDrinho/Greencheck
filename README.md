@@ -58,7 +58,7 @@ A interface do protótipo oferece uma aba dedicada a relatórios que materializa
 * **Safras por Trabalhador:** a partir do CPF de um trabalhador rural, exibe todas as safras em que ele participou, com localização, datas de plantio e colheita, produto cultivado e quantidade produzida.
 * **Estoque e Vendas de Produto:** informa, para um produto agrícola, a quantidade atual em estoque, o total já vendido e a receita acumulada com essas vendas.
 * **Lotes Mais Avaliados:** identifica o(s) lote(s) que recebeu(ram) o maior número de avaliações de solo, útil para monitorar áreas críticas.
-* **Engenheiros com Cobertura Total:** lista os engenheiros agrônomos que já avaliaram todos os lotes cadastrados (divisão relacional).
+* **Engenheiros que avaliaram todos os Lotes:** lista os engenheiros agrônomos que já avaliaram todos os lotes cadastrados.
 * **Gerentes com Todas as Transações:** aponta os gerentes agrícolas que realizaram pelo menos uma venda, uma compra e uma manutenção, cobrindo todas as frentes comerciais.
 
 ---
